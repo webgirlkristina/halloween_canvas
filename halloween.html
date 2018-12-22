@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Happy Halloween!</title>
+  </head>
+  <body>
+    <canvas id="canvas" width="640" height="640"></canvas>
+    <script>
+
+      function Animation(rate) {
+        this.LastTime = 0;
+        this.Rate = rate;
+        this.update = function () {};
+        this.render = function () {};
+      }
+
+      Animation.prototype.run = function(time) {
+        if((time - this.LastTime) > this.Rate ) {
+          this.LastTime = time;
+          this.update();
+        }
+        this.render();
+      };
+
+
+      //layer 1
+      var layer1 = new Animation(30);
+      layer1.render = function () {
+        ctx.drawImage(art, 0,0,640,640,
+                            0,0,640,640);
+      }
+
+      //layer2
+      var layer2 = new Animation(30);
+      layer2.sx = 640;
+      layer2.sy = 0;
+      layer2.w = 1280;
+      layer2.dx = 0;
+      layer2.speed = 1;
+
+      layer2.update = function () {
+        this.dx += this.speed;
+        if(this.dx > this.w) {
+          this.dx -= this.w;
+        }
+      };
+
+      layer2.render = function () {
+        ctx.drawImage(art,this.sx+this.dx,this.sy,640,640,
+                          0,0,640,640);
+        if(this.dx > (this.w - 640)) {
+          ctx.drawImage(art, this.sx,this.sy,640,640,
+                            this.w - this.dx,0,640,640);
+        }
+      };
+
+      var layer3 = new Animation(30);
+      layer3.sx = 0;
+      layer3.sy = 640;
+      layer3.w = 1280;
+      layer3.speed = 3;
+      layer3.dx = 0;
+      layer3.update = layer2.update;
+      layer3.render = layer2.render;
+
+      var layer4 = new Animation(30);
+      layer4.sx = 0;
+      layer4.sy = 1280;
+      layer4.w = 1920;
+      layer4.dx = 0;
+      layer4.speed = 6;
+      layer4.update = layer2.update;
+      layer4.render = layer2.render;
+
+      var layer5 = new Animation(30);
+      layer5.sx = 0;
+      layer5.sy = 1920;
+      layer5.w = 1920;
+      layer5.dx = 0;
+      layer5.speed = 10;
+      layer5.update = layer2.update;
+      layer5.render = layer2.render;
+
+      var zombie = new Animation(100);
+
+      zombie.frame_num = 0;
+
+      zombie.get_frame = function() {
+        if(this.frame_num > 4) {
+          return {x:((this.frame_num -5)*300),y:2880 };
+        } else {
+          return {x:(this.frame_num*300),y:2560};
+        }
+      }
+
+      zombie.update = function () {
+        this.frame_num++;
+        if(this.frame_num > 9) this.frame_num = 0;
+      }
+
+      zombie.render = function () {
+          var frame = this.get_frame();
+          ctx.drawImage(art,frame.x,frame.y,300,320,
+                            150,200,300,320);
+      }
+
+      function MainLoop(time) {
+        layer1.run(time);
+        layer2.run(time);
+        layer3.run(time);
+        layer4.run(time);
+        zombie.run(time);
+        layer5.run(time);
+        requestAnimationFrame(MainLoop);
+      }
+
+      var canvas = document.getElementById('canvas');
+      var ctx = canvas.getContext('2d');
+      var art = new Image();
+      art.src = "art.png";
+      art.onload = function() {
+        requestAnimationFrame(MainLoop);
+      }
+
+    </script>
+  </body>
+</html>
